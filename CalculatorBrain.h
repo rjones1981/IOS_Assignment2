@@ -11,11 +11,19 @@
 
 @interface CalculatorBrain : NSObject
 
-@property (nonatomic, readonly) id program;
-
-- (void)pushOperand:(double)operand;
+- (void)setOperand:(double)aDouble;
+- (void)setVariableAsOperand:(NSString *)variableName;
 - (double)performOperation:(NSString *)operation;
-+ (NSString *)descriptionOfProgram:(id)program;
-+ (double)runProgram:(id)program;
+
+@property (nonatomic, readonly) id expression;
+
++ (double)evaluateExpression:(id)anExpression
+         usingVariableValues:(NSDictionary *)variables;
+
++ (NSSet *)variablesInExpression:(id)anExpression;
++ (NSString *)descriptionOfExpression:(id)anExpression;
+
++ (id)propertyListForExpression:(id)anExpression;
++ (id)expressionForPropertyList:(id)propertyList;
 
 @end

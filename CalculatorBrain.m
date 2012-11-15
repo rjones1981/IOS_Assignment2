@@ -9,6 +9,8 @@
 
 #import "CalculatorBrain.h"
 
+#define VARIABLE_PREFIX @"%%"
+
 @interface CalculatorBrain()
 
 @property (nonatomic, strong) NSMutableArray *programStack;
@@ -18,25 +20,41 @@
 @implementation CalculatorBrain
 
 @synthesize programStack = _programStack;
-@synthesize program = _program;
+@synthesize expression = _expression;
 
+/* private static method that provides an instance of CalculatorBrain to run static methods */
++ (double)runProgram:(id)program {
+    NSMutableArray *stack;
+    if ([program isKindOfClass:[NSArray class]]) {
+        stack = [program mutableCopy];
+    }
+    return [self popOperandOffProgramStack:stack];
+}
+
+/* lazy init of the program stack that contains numbers, variables, and operations */
 - (NSMutableArray *)programStack {
-    if (_programStack == nil) _programStack = [[NSMutableArray alloc] init];
+    if(_programStack == nil) _programStack = [[NSMutableArray alloc] init];
     return _programStack;
 }
 
-- (id)program {
+/* getter to return the expression */
+- (id)expression {
     return [self.programStack copy];
 }
 
-+ (NSString *)descriptionOfProgram:(id)program {
-    return @"Implement this in Homework #2";
+/* set an operand into memory */
+- (void)setOperand:(double)aDouble {
+    [self.programStack addObject:[NSNumber numberWithDouble:aDouble]];
 }
 
-- (void)pushOperand:(double)operand {
-    [self.programStack addObject:[NSNumber numberWithDouble:operand]];
+/* set a variable into memory */
+- (void)setVariableAsOperand:(NSString *)variableName {
+    
+    /* if we get a variable to put on the stack prepend %% so we can tell this is a variable in our expression and add to stack */
+    [self.programStack addObject:[VARIABLE_PREFIX stringByAppendingString:variableName]];
 }
 
+/* add and operation to memory or clear memory */
 - (double)performOperation:(NSString *)operation {
     
     /* if the user presses clear nill out the stack */
@@ -45,10 +63,22 @@
     } else  {
         [self.programStack addObject:operation];
     }
-    return [[self class] runProgram:self.program];
+    return [[self class] runProgram:self.expression];
 }
 
+/* evaluate a given expression using variables passed in */
++ (double)evaluateExpression:(id)anExpression usingVariableValues:(NSDictionary *)variables {
+    
+    /* substitute values for variables when running program */
+    /* iterate or recursion */
+    
+    /* after substitution start calculation */
+    return [CalculatorBrain popOperandOffProgramStack:anExpression];
+}
+
+/* private static method to process the stack */
 + (double)popOperandOffProgramStack:(NSMutableArray *)stack {
+    
     double result = 0;
 
     id topOfStack = [stack lastObject];
@@ -87,12 +117,20 @@
     return result;
 }
 
-+ (double)runProgram:(id)program {
-    NSMutableArray *stack;
-    if ([program isKindOfClass:[NSArray class]]) {
-        stack = [program mutableCopy];
-    }
-    return [self popOperandOffProgramStack:stack];
++ (id)propertyListForExpression:(id)anExpression {
+    return nil;
+}
+
++ (id)expressionForPropertyList:(id)propertyList {
+    return nil;
+}
+
++ (NSSet *)variablesInExpression:(id)anExpression {
+    return nil;
+}
+
++ (NSString *)descriptionOfExpression:(id)anExpression {
+    return nil;
 }
 
 @end

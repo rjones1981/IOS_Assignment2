@@ -39,23 +39,41 @@
 
 - (IBAction)operationPressed:(UIButton *)sender {
     
-    if(self.userIsInTheMiddleOfPressingEnter) {
-        [self enterPressed];
-    }
     
     NSString *operation = [sender currentTitle];
     double result = [self.brain performOperation:operation];
     self.display.text = [NSString stringWithFormat:@"%g", result];
 }
 
+- (IBAction)clearPressed {
+    self.display.text = @"";
+}
+
 - (IBAction)enterPressed {
     if(self.display.text)
-    [self.brain pushOperand:[self.display.text doubleValue]];
+        //[self.brain pushOperand:[self.display.text doubleValue]];
     self.userIsInTheMiddleOfPressingEnter = NO;
 }
 
-- (IBAction)clearPressed {
-    self.display.text = @"";
+- (IBAction)setVariableWithOperandPressed:(UIButton *)sender {
+    [self.brain setVariableAsOperand:sender.currentTitle];
+}
+
+- (IBAction)solvePressed {
+    
+    /* take expression on calculator and eval it using various values */
+    NSString *expression = self.display.text;
+    
+    /* dictionary contains NSNumber value and NSString key */
+    NSMutableDictionary *testVars = [[NSMutableDictionary alloc] init];
+    [testVars setValue:[NSNumber numberWithDouble:[@"2" doubleValue]] forKey:@"x"];
+    [testVars setValue:[NSNumber numberWithDouble:[@"4" doubleValue]] forKey:@"a"];
+    [testVars setValue:[NSNumber numberWithDouble:[@"6" doubleValue]]forKey:@"b"];
+    
+    /* eval the expression using the brain and set the text */
+    double result = [CalculatorBrain evaluateExpression:expression usingVariableValues:testVars];
+    self.display.text = [NSString stringWithFormat:@"%g", result];
+    
 }
 
 @end
