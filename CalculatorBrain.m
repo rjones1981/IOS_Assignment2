@@ -69,11 +69,43 @@
 /* evaluate a given expression using variables passed in */
 + (double)evaluateExpression:(id)anExpression usingVariableValues:(NSDictionary *)variables {
     
-    /* substitute values for variables when running program */
-    /* iterate or recursion */
+    /* an expression should be of type NSArray to be valid */
+    if([anExpression isKindOfClass:[NSArray class]]) {
     
-    /* after substitution start calculation */
-    return [CalculatorBrain popOperandOffProgramStack:anExpression];
+        /* substitute values for variables when running program */
+        NSArray *expressionToIterateOver = anExpression;
+        NSMutableArray *mutableCopyOfExpression = [anExpression mutableCopy];
+    
+        for(id element in expressionToIterateOver) {
+            
+            /* if the type is string it could be a variable */
+            if([element isKindOfClass:[NSString class]]) {
+
+                /* see if string is a variable if so replace it in the mutable copy */
+                NSString *value = element;
+                NSRange variablePrefixRange = [value rangeOfString:VARIABLE_PREFIX];
+                
+                if(variablePrefixRange.location != NSNotFound) {
+                    
+                    /* variable */
+                    NSRange variableNameRange = NSMakeRange(VARIABLE_PREFIX.length,1);
+                    NSString *variableName = [value substringWithRange:variableNameRange];
+                   
+                    if([variables objectForKey:variableName]) {
+                        /* set the variable value in place of the variable in the expression copy */
+                    [mutableCopyOfExpression replaceObjectAtIndex:[expressionToIterateOver indexOfObject:element]
+                                                       withObject:[variables objectForKey:variableName]];
+                    }
+                }
+            }
+        }
+    
+        /* after substitution start calculation on the updated mutable copy */
+        return [CalculatorBrain popOperandOffProgramStack:mutableCopyOfExpression];
+    
+    } else {
+        return nil;
+    }
 }
 
 /* private static method to process the stack */
@@ -118,11 +150,23 @@
 }
 
 + (id)propertyListForExpression:(id)anExpression {
-    return nil;
+    
+    /* take in an immutable NSArray expression and return mutable property list */
+    if([anExpression isKindOfClass:[NSArray class]]) {
+        return [anExpression mutableCopy];
+    } else {
+        return nil;
+    }
 }
 
 + (id)expressionForPropertyList:(id)propertyList {
-    return nil;
+    
+    /* take in a NSMutableArray propertyList and return and immutable NSArray representing the expression */
+    if([propertyList isKindOfClass:[NSMutableArray class]]) {
+        return [propertyList copy];
+    } else {
+        return nil;
+    }
 }
 
 + (NSSet *)variablesInExpression:(id)anExpression {
