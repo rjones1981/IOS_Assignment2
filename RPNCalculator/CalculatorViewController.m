@@ -1,79 +1,175 @@
 //
 //  CalculatorViewController.m
-//  RPNCalculator
+//  Calculator
 //
-//  Created by Rabun Jones on 11/3/12.
-//  Copyright (c) 2012 edu.standford.cs193p.rjones. All rights reserved.
+//  Created by Timothée Boucher on 11/30/11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "CalculatorViewController.h"
 #import "CalculatorBrain.h"
 
-@interface CalculatorViewController ()
+@interface CalculatorViewController()
 
+@property (nonatomic) BOOL userIsInTheMiddleOfEnteringANumber;
 @property (nonatomic, strong) CalculatorBrain *brain;
-@property BOOL userIsInTheMiddleOfPressingEnter;
+@property (nonatomic, strong) NSMutableDictionary *testVariableValues;
 
 @end
 
 @implementation CalculatorViewController
 
-@synthesize display = _display;
+@synthesize fullOperationDisplay;
+@synthesize variablesDisplay;
+@synthesize display;
+@synthesize userIsInTheMiddleOfEnteringANumber = _userIsInTheMiddleOfEnteringANumber;
 @synthesize brain = _brain;
-@synthesize userIsInTheMiddleOfPressingEnter;
+@synthesize testVariableValues = _testVariableValues;
 
-- (CalculatorBrain *)brain {
-    if(!_brain) _brain = [[CalculatorBrain alloc] init];
+-(CalculatorBrain *) brain {
+    if (!_brain) {
+        _brain = [[CalculatorBrain alloc] init];
+    }
     return _brain;
 }
 
-- (IBAction)digitPressed:(UIButton *)sender {
-    NSString *digit = sender.currentTitle;
-    if(userIsInTheMiddleOfPressingEnter) {
-        self.display.text = [self.display.text stringByAppendingString:digit];
-    } else {
-        self.display.text = digit;
-        self.userIsInTheMiddleOfPressingEnter = YES;
+- (NSMutableDictionary *) testVariableValues {
+    if (!_testVariableValues) {
+        _testVariableValues = [[NSMutableDictionary alloc] initWithObjectsAndKeys: @"1", @"a", @"2", @"b", @"3", @"x", nil];
+    }
+    return _testVariableValues;
+}
+
+-(void) clearEqualSignFromFullDisplay {
+    if ([self.fullOperationDisplay.text hasSuffix:@"="]) {
+        self.fullOperationDisplay.text = [self.fullOperationDisplay.text substringToIndex:self.fullOperationDisplay.text.length-1];
     }
 }
 
-- (IBAction)operationPressed:(UIButton *)sender {
+// Returns the string of all variables currently used with their value
+-(NSString *) variablesString {
+    NSMutableString *variablesString = [NSMutableString string];
+    NSSet *variablesUsedInProgram = [CalculatorBrain variablesUsedInProgram:self.brain.program];
     
-    
-    NSString *operation = [sender currentTitle];
-    double result = [self.brain performOperation:operation];
-    self.display.text = [NSString stringWithFormat:@"%g", result];
+    for (NSString *variable in self.testVariableValues) {
+        if ([variablesUsedInProgram containsObject:variable]) {
+            [variablesString appendFormat:@"%@ = %@  ", variable, [self.testVariableValues valueForKey:variable]];
+        }
+    }
+    return variablesString;
 }
 
-- (IBAction)clearPressed {
-    self.display.text = @"";
+// Shortcut to update all displays
+-(void)updateDisplays:(NSString *)mainDisplayText {
+    if (mainDisplayText) {
+        self.display.text = mainDisplayText;
+    } else {
+        id programValue = [CalculatorBrain runProgram:self.brain.program usingVariableValues:self.testVariableValues];
+        if ([programValue isKindOfClass: [NSNumber class]]) {
+           self.display.text = [NSString stringWithFormat:@"%@", [programValue stringValue]];
+        } else if ([programValue isKindOfClass:[NSString class]]) {
+            self.display.text = programValue;
+        } else { // default case means stack is empty
+            self.display.text = @"0";
+        }
+    }
+    self.fullOperationDisplay.text = [CalculatorBrain descriptionOfProgram:self.brain.program];
+    self.variablesDisplay.text = [self variablesString];
+}
+
+- (IBAction)digitPressed:(UIButton *)sender {
+    [self clearEqualSignFromFullDisplay];
+    NSString *digit = [sender currentTitle];
+    if (self.userIsInTheMiddleOfEnteringANumber) {
+        self.display.text = [self.display.text stringByAppendingString:digit];
+    } else {
+        self.display.text = digit;
+        self.userIsInTheMiddleOfEnteringANumber = YES;
+    }
+}
+
+- (IBAction)dotPressed {
+    [self clearEqualSignFromFullDisplay];
+    if (self.userIsInTheMiddleOfEnteringANumber) {
+        if ([self.display.text rangeOfString:@"."].location == NSNotFound) {
+            self.display.text = [self.display.text stringByAppendingString:@"."];
+        }
+    } else {
+        self.display.text = @"0.";
+        self.userIsInTheMiddleOfEnteringANumber = YES;
+    }
 }
 
 - (IBAction)enterPressed {
-    if(self.display.text)
-        //[self.brain pushOperand:[self.display.text doubleValue]];
-    self.userIsInTheMiddleOfPressingEnter = NO;
+    [self.brain pushOperand:[self.display.text doubleValue]];
+    self.userIsInTheMiddleOfEnteringANumber = NO;
+    [self updateDisplays:nil];
 }
 
-- (IBAction)setVariableWithOperandPressed:(UIButton *)sender {
-    [self.brain setVariableAsOperand:sender.currentTitle];
+- (IBAction)variablePressed:(UIButton *)sender {
+    if (self.userIsInTheMiddleOfEnteringANumber) {
+        [self enterPressed];
+    }
+    [self.brain pushVariable:sender.currentTitle];
+    [self updateDisplays:sender.currentTitle];
+    self.userIsInTheMiddleOfEnteringANumber = NO;
 }
 
-- (IBAction)solvePressed {
+
+- (IBAction)operationPressed:(UIButton *)sender {
+    [self clearEqualSignFromFullDisplay];
     
-    /* take expression on calculator and eval it using various values */
-    NSString *expression = self.display.text;
-    
-    /* dictionary contains NSNumber value and NSString key */
-    NSMutableDictionary *testVars = [[NSMutableDictionary alloc] init];
-    [testVars setValue:[NSNumber numberWithDouble:[@"2" doubleValue]] forKey:@"x"];
-    [testVars setValue:[NSNumber numberWithDouble:[@"4" doubleValue]] forKey:@"a"];
-    [testVars setValue:[NSNumber numberWithDouble:[@"6" doubleValue]]forKey:@"b"];
-    
-    /* eval the expression using the brain and set the text */
-    double result = [CalculatorBrain evaluateExpression:expression usingVariableValues:testVars];
-    self.display.text = [NSString stringWithFormat:@"%g", result];
-    
+    if (self.userIsInTheMiddleOfEnteringANumber && [sender.currentTitle isEqualToString:@"+/-"]) {
+        if ([self.display.text hasPrefix:@"-"]) {
+            self.display.text = [self.display.text substringFromIndex:1];
+        } else {
+            self.display.text = [NSString stringWithFormat:@"-%@", self.display.text];
+        }
+    } else {
+        if (self.userIsInTheMiddleOfEnteringANumber) {
+            [self enterPressed];
+        }
+        [self.brain performOperation:sender.currentTitle];
+        [self updateDisplays:nil];
+    }
+}
+
+- (IBAction)clearDisplay {
+    [self.brain clearCalculator];
+    [self updateDisplays:@"0"];
+    self.userIsInTheMiddleOfEnteringANumber = NO;
+}
+
+- (IBAction)setVariableValues:(UIButton *)sender {
+    if ([sender.currentTitle isEqualToString:@"Test 1"]) {
+        self.testVariableValues = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"a", @"2", @"b", @"3", @"x", nil ];
+    } else if ([sender.currentTitle isEqualToString:@"Test 2"]) {
+        self.testVariableValues = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"0", @"a", @"-5", @"b", @"0.5", @"x", nil ];
+    } else if ([sender.currentTitle isEqualToString:@"Test 3"]) {
+        self.testVariableValues = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"a", @"2", @"b", @"3", @"x", nil ];
+    } else if ([sender.currentTitle isEqualToString:@"Test 4"]) {
+        self.testVariableValues = nil;
+    }
+    [self updateDisplays:nil];
+}
+
+- (IBAction)undo {
+    if (self.userIsInTheMiddleOfEnteringANumber) {
+        self.display.text = [self.display.text substringToIndex:[self.display.text length]-1];
+        if (self.display.text.length == 0) {
+            self.userIsInTheMiddleOfEnteringANumber = NO;
+            [self updateDisplays:nil];
+        }
+    } else {
+        [self.brain undo];
+        [self updateDisplays:nil];
+    }
+}
+
+- (void)viewDidUnload {
+    [self setFullOperationDisplay:nil];
+    [self setVariablesDisplay:nil];
+    [super viewDidUnload];
 }
 
 @end

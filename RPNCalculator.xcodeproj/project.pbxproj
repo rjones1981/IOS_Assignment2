@@ -18,7 +18,7 @@
 		EA587DB01645BF96007155A6 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = EA587DAF1645BF96007155A6 /* Default-568h@2x.png */; };
 		EA587DB31645BF96007155A6 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA587DB11645BF96007155A6 /* MainStoryboard.storyboard */; };
 		EA587DB61645BF96007155A6 /* CalculatorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EA587DB51645BF96007155A6 /* CalculatorViewController.m */; };
-		EA587DC21645CA7C007155A6 /* CalculatorBrain.m in Sources */ = {isa = PBXBuildFile; fileRef = EA587DC11645CA7C007155A6 /* CalculatorBrain.m */; };
+		EA70EF0E16589FB30070EC9C /* CalculatorBrain.m in Sources */ = {isa = PBXBuildFile; fileRef = EA70EF0D16589FB30070EC9C /* CalculatorBrain.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,8 +38,8 @@
 		EA587DB21645BF96007155A6 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		EA587DB41645BF96007155A6 /* CalculatorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalculatorViewController.h; sourceTree = "<group>"; };
 		EA587DB51645BF96007155A6 /* CalculatorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CalculatorViewController.m; sourceTree = "<group>"; };
-		EA587DC01645CA7C007155A6 /* CalculatorBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CalculatorBrain.h; path = ../CalculatorBrain.h; sourceTree = "<group>"; };
-		EA587DC11645CA7C007155A6 /* CalculatorBrain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CalculatorBrain.m; path = ../CalculatorBrain.m; sourceTree = "<group>"; };
+		EA70EF0D16589FB30070EC9C /* CalculatorBrain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CalculatorBrain.m; sourceTree = "<group>"; };
+		EA70EF1016589FC40070EC9C /* CalculatorBrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalculatorBrain.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +86,8 @@
 		EA587D9F1645BF95007155A6 /* RPNCalculator */ = {
 			isa = PBXGroup;
 			children = (
-				EA587DC01645CA7C007155A6 /* CalculatorBrain.h */,
-				EA587DC11645CA7C007155A6 /* CalculatorBrain.m */,
+				EA70EF1016589FC40070EC9C /* CalculatorBrain.h */,
+				EA70EF0D16589FB30070EC9C /* CalculatorBrain.m */,
 				EA587DA81645BF96007155A6 /* CalculatorAppDelegate.h */,
 				EA587DA91645BF96007155A6 /* CalculatorAppDelegate.m */,
 				EA587DB11645BF96007155A6 /* MainStoryboard.storyboard */,
@@ -182,7 +182,7 @@
 				EA587DA61645BF95007155A6 /* main.m in Sources */,
 				EA587DAA1645BF96007155A6 /* CalculatorAppDelegate.m in Sources */,
 				EA587DB61645BF96007155A6 /* CalculatorViewController.m in Sources */,
-				EA587DC21645CA7C007155A6 /* CalculatorBrain.m in Sources */,
+				EA70EF0E16589FB30070EC9C /* CalculatorBrain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
