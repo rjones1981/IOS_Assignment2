@@ -9,6 +9,7 @@
 #import "CalculatorBrain.h"
 
 @interface CalculatorBrain()
+
 @property (nonatomic, strong) NSMutableArray *programStack;
 
 @end
@@ -19,6 +20,7 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
 
 @synthesize programStack = _programStack;
 
+/* like a static block in java setup these variables before any instances of the class are created */
 +(void) initialize {
     if (!validOperations) {
         validOperations = [[NSSet alloc] initWithObjects:@"sin", @"cos", @"sqrt", @"π", @"+/-", @"+", @"-", @"*", @"/" , nil];
@@ -28,14 +30,17 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     }
 }
 
+/* class utility method to see if a certain element is a variable or not */
 +(BOOL)isVariable:(id)operand {
     return [operand isKindOfClass:[NSString class]] && ![validOperations containsObject:operand];
 }
 
+/* class utility method to see if a certain element is an operation or not */
 +(BOOL)isOperation:(id)operation {
     return [operation isKindOfClass:[NSString class]] && [validOperations containsObject:operation];
 }
 
+/* getter for the porgram stack allows lazy init */
 -(NSMutableArray *)programStack {
     if (!_programStack) {
         _programStack = [[NSMutableArray alloc] init];
@@ -43,10 +48,12 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return _programStack;
 }
 
+/* public interface for the state contained in the CalculatorBrain */
 -(id) program {
     return [self.programStack copy];
 }
 
+/* recursive class utility method to return a human readable representation of the contents of the stack */
 +(NSString *)descriptionOfTopOfStack:(id)stack previousOperation:(NSString *)previousOperation {
     NSString *result;
     id topOfStack = [stack lastObject];
@@ -81,6 +88,7 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return result;
 }
 
+/* public interface for returning human readable representation of the contents of the stack */
 + (NSString *)descriptionOfProgram:(id)program {
     NSMutableArray *stack;
     NSMutableString *result;
@@ -101,33 +109,34 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return result;
 }
 
-
+/* add an operand to the stack */
 -(void) pushOperand:(double)operand {
     [self.programStack addObject:[NSNumber numberWithDouble:operand]];
 }
 
+/* add a variable to the stack */
 -(void) pushVariable:(NSString *)variable {
     if ([CalculatorBrain isVariable:variable]) {
         [self.programStack addObject:variable];
     }
 }
 
-
-- (id)performOperation:(NSString *)operation
-{
+/* perform a given operation on the elements in the stack */
+- (id)performOperation:(NSString *)operation {
     if ([CalculatorBrain isOperation:operation]) {
         [self.programStack addObject:operation];
     }
     return [[self class] runProgram:self.program];
 }
 
-
+/* pop an operand off the stack */
 -(double) popOperand {
     NSNumber *operandObject = [self.programStack lastObject];
     if (operandObject) [self.programStack removeLastObject];
     return [operandObject doubleValue];
 }
 
+/* recursive class method for evaluating the stack and running any operations */
 +(id) popOperandOffProgramStack:(NSMutableArray *)stack {
     id result;
     
@@ -190,8 +199,8 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return result;
 }
 
-+ (id)runProgram:(id)program
-{
+/* provides an instance of CalculatorBrain and runs the given program against it */
++ (id)runProgram:(id)program {
     NSMutableArray *stack;
     if ([program isKindOfClass:[NSArray class]]) {
         stack = [program mutableCopy];
@@ -199,7 +208,7 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return [self popOperandOffProgramStack:stack];
 }
 
-
+/* provides an instance of CalculatorBrain and runs the given program with variables against it */
 + (id)runProgram:(id)program usingVariableValues:(NSDictionary *)variableValues {
     NSMutableArray *stack;
     if ([program isKindOfClass:[NSArray class]]) {
@@ -215,10 +224,9 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return [self runProgram:stack];
 }
 
-
-                 
+/* go through the program array and look for any variables */
 + (NSSet *)variablesUsedInProgram:(id)program {
-    NSMutableSet *foundVariables = [[NSMutableSet alloc] init]; // do we need the alloc/init here?
+    NSMutableSet *foundVariables = [[NSMutableSet alloc] init]; 
     if ([program isKindOfClass:[NSArray class]]) {
         for (id programElement in program) {
             if ([self isVariable:programElement]) {
@@ -232,14 +240,15 @@ NSSet *validOperations, *twoOperandOperations, *oneOperandOperations, *noOperand
     return nil;
 }
 
+/* simply remove the last object from the stack */
 -(void)undo {
     [self.programStack removeLastObject];
 }
 
+/* clear the memory for all of the calculator */
 -(void) clearCalculator {
     [self.programStack removeAllObjects];
 }
-
 
 
 @end
